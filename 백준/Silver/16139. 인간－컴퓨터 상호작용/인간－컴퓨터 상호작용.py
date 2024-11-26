@@ -2,46 +2,40 @@
 # 문자열 S에서, 특정 알파벳 a와, 구간[l,r]이 주워지면,
 #  해당 구간에 a가 얼마만큼 나타나는지 구함
 
+import sys
 
-## TEST CASE
-'''
-seungjaehwang
-4
-a 0 5
-a 0 6
-a 6 10
-a 7 10
-'''
+data = sys.stdin.readlines()
 
-S = input()
-q = int(input())
-result =[]
+S = data[0].strip()  # 첫 번째 줄: 문자열 S
+q = int(data[1].strip())  # 두 번째 줄: 쿼리 개수
+queries = data[2:]  # 나머지 줄: 쿼리 데이터
+
+#누적합 딕셔너리 생성
 prefix_sum = {}
 for char in set(S):
-    prefix_sum[char] = [0] * len(S)
+    prefix_sum[char] = [0] * (len(S)+1)
 
-#누적합 계산
-#리스트가 초기화된 상태에서, 마지막 요소는 항상 0이므로 i=0일때부터 순회 가능
+
+# 누적합 계산
 for i in range(len(S)):
     for char in prefix_sum.keys():
-        if char == S[i]:
-            prefix_sum[char][i] = prefix_sum[char][i-1] + 1
-            
-        else :
-            prefix_sum[char][i] = prefix_sum[char][i-1]
+        prefix_sum[char][i + 1] = prefix_sum[char][i]  # 이전 값 복사
+    prefix_sum[S[i]][i + 1] += 1  # 현재 문자의 누적값 증가
 
-
-for i in range(q):
-    a, l, r = input().split()
-    #문자가 존재하지 않을 경우
-    if a not in prefix_sum:
-        result.append(0)
+result =[]
+for query in queries:
+    char, l, r = query.split()
+    l, r = int(l), int(r)
+    #문자가 존재할 경우
+    if char in prefix_sum:
+        result.append(prefix_sum[char][r + 1] - prefix_sum[char][l])
         
-    #l값이 0 일 경우 분리
-    elif int(l) == 0:
-        result.append(prefix_sum[a][int(r)])
-        
+    #문자가 존재하지 않는 경우
     else:
-        result.append(prefix_sum[a][int(r)] - prefix_sum[a][int(l) - 1])
+        result.append(0)
 
-print("\n".join(map(str, result)))
+
+        
+
+# 정수를 문자열로 변환하여 출력
+print('\n'.join(map(str, result)))
