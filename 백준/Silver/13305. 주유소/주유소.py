@@ -11,12 +11,17 @@ min_index =0
 for i in range(1,N) :
     # i번쨰 방문한 도시가 min_oli 도시의 기름보다 저렴하다면,
     #해당 구간 거리만큼 기름을 구매
-    if  min_oli >= olis[i] :  
+    
+    #print(f"min oli[{min_index}]: ",min_oli, f"olis[{i}]: ",olis[i])
+    if  min_oli >= olis[i] or i==N-1:  
         total_cost += sum(roads[min_index : i])*min_oli
+        #print("total: ",sum(roads[min_index : i]),' * ',min_oli, " = ", total_cost)
+
         min_oli = olis[i]
         min_index = i
+        
+        #print(f'chage => min oli[{min_index}] :', min_oli, )    
     
-    #print("최소값 ",min_oli, min_index)
-    #print("i and total: ",i, total_cost)
+
 
 print(total_cost)
