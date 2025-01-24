@@ -1,48 +1,45 @@
 import sys
+import math
+input = sys.stdin.readline
 
-def file_merge_min_cost(k, files):
-    # 누적 합 계산
-    prefix_sum = [0] * (k + 1)
-    for i in range(k):
-        prefix_sum[i + 1] = prefix_sum[i] + files[i]
+for _ in range(int(input())):
+    k = int(input())
+    files= list(map(int, input().split()))
     
-    # DP 테이블 및 최적 분할 지점 테이블 초기화
-    dp = [[0] * k for _ in range(k)]
-    opt = [[0] * k for _ in range(k)]
-    
-    for i in range(k):
-        opt[i][i] = i  # 초기 조건: 같은 파일은 비용 0
-    
-    # 구간의 길이별로 최소 비용 계산
-    for length in range(1, k):
-        for i in range(k - length):
-            j = i + length
-            dp[i][j] = float('inf')
+    dp=[[0] * k for _ in range(k)]
+    prefix = [files[0]] * k
+    #0부터 더할때 -1인덱스를 0으로 만들기 위함
+    prefix.append(0)
+    # i 부터 j 까지 합치는데 필요한 최소 비용
+    for i in range(1, k):
+        for j in range(k-i):
             
-            # Knuth 최적화를 위한 k 탐색 범위 설정
-            start = opt[i][j - 1]
-            end = opt[i + 1][j] if (i + 1) < k else j - 1
-            if end < start:
-                end = start  # 범위를 벗어나지 않도록 조정
+            #dp[0][1], dp[1][2], dp[2][3]... 일때는 이어진 두 페이지의 합을 먼저 구함
+            #prefix 배열에 누적합을 저장
+            if i == 1 :
+                dp[j][i+j] = files[j] + files[j+1]
+                prefix[i+j] = prefix[j] + files[i+j]
             
-            # 최적의 k를 찾아 최소 비용 계산
-            for m in range(start, end + 1):
-                if m >= j:
-                    continue  # 유효한 범위 내에서만 계산
-                cost = dp[i][m] + dp[m + 1][j] + prefix_sum[j + 1] - prefix_sum[i]
-                if cost < dp[i][j]:
-                    dp[i][j] = cost
-                    opt[i][j] = m  # 최적의 k 저장
-    
-    return dp[0][k - 1]
+            # dp[j][i+j] = sum(j:i+j) + min(dp[0][2](ABC) + dp[3][3](D), dp[1][2](AB) + dp[2][3](CD), dp[0][0](A) + dp[1,3](BCD))
+                                      # min(for mid in range(j,i+j):  dp[j][mid] + dp[mid][i+j])
+            else :
+                #sum(j : i+j)
+                sumdata=  prefix[i+j] - prefix[j-1]
+                #print(f"dp[{j}][{j+i}] = sumdata({sumdata} + min({j}~{i+j}))")
+                #print("최소값 탐색중..")
+                mincost = math.inf
+                for mid in range(j, i+j):
+                    #print(f"dp[{j}][{mid}]({dp[j][mid]}) + dp[{mid+1}][{i+j}]({dp[mid+1][i+j]}) = {dp[j][mid] + dp[mid+1][i+j]}")
+                    mincost = min(mincost, dp[j][mid] + dp[mid+1][i+j])
+                dp[j][i+j] = sumdata + mincost
+                # print("최적값 계산 완료")
+                # print(f"sum({sumdata}) + min({mincost}) = {dp[j][i+j]}")
+                # print()
+                # for line in dp:
+                #     for el in line:
+                #         print("%04d" %el, end=" ")
+                #     print()
 
-# 입력 전체를 한 번에 읽어 처리
-data = sys.stdin.read().split()
-idx = 0
-T = int(data[idx]); idx += 1
-
-for _ in range(T):
-    k = int(data[idx]); idx += 1
-    files = list(map(int, data[idx:idx + k])); idx += k
-    result = file_merge_min_cost(k, files)
-    print(result)
+                
+            #dp[j][j+i] = sum(files[j:i+j]) 
+    print(dp[0][k-1])
