@@ -1,51 +1,33 @@
-import * as readline from 'readline';
-
+import readline = require('readline');
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
-
 const input: string[] = [];
-
-rl.on('line', (line) => {
+rl.on('line', line => {
   input.push(line.trim());
 }).on('close', () => {
   solve();
+  process.exit();
 });
-
 type Tree = {
-  [key: string]: [string, string]; // 노드: [왼쪽 자식, 오른쪽 자식]
+  [key: string]: [string, string]; // node: [left, right]
 };
 
-const tree: Tree = {};
-
 function solve() {
-  const N: number = parseInt(input[0]);
-  
-  // 트리 구성
-  for (let i = 1; i <= N; i++) {
-    const [parent, left, right] = input[i].split(' ');
-    tree[parent] = [left, right];
-  }
-
   const preorder: string[] = [];
   const inorder: string[] = [];
   const postorder: string[] = [];
 
-  function dfs(node: string) {
-    if (node === '.') return;
-
-    const [left, right] = tree[node];
-
-    // 전위순회: 현재 → 왼쪽 → 오른쪽
-    preorder.push(node);
-    dfs(left);
-    // 중위순회: 왼쪽 → 현재 → 오른쪽
-    inorder.push(node);
-    dfs(right);
-    // 후위순회: 왼쪽 → 오른쪽 → 현재
-    postorder.push(node);
-  }
+  const tree: Tree = (() => {
+    const tree: Tree = {};
+    const N = Number(input[0]);
+    for (let i = 1; i <= N; i++) {
+      const [node, leftCh, rightCh] = input[i].split(' ');
+      tree[node] = [leftCh, rightCh];
+    }
+    return tree;
+  })();
 
   function preOrder(node: string) {
     if (node === '.') return;
@@ -70,7 +52,6 @@ function solve() {
     postOrder(right);
     postorder.push(node);
   }
-
   preOrder('A');
   inOrder('A');
   postOrder('A');
